@@ -1,4 +1,6 @@
 # Help for Automating DO Deployments
 
-Slug for DO Docker image
-docker-16-04
+- Create a docker droplet using 
+    post_droplet_docker.py
+- Delete that droplet using
+    delete_droplet.py
