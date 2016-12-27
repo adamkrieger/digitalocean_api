@@ -23,7 +23,7 @@ PARSER = argparse.ArgumentParser()
 PARSER.add_argument('--name', help='Name of the impending droplet.')
 PARSER.add_argument('--ssh_path', help='Fingerprint of DigitalOcean-stored SSH key.')
 
-def create_droplet(name, ssh_key):
+def create_droplet(token, name, ssh_key):
     """Contacts DO to create the droplet"""
 
     ssh_keys = []
@@ -37,10 +37,9 @@ def create_droplet(name, ssh_key):
     create_args['image'] = 'docker-16-04'
     create_args['ssh_keys'] = ssh_keys
 
-    token = os.environ['DO_TOKEN']
-
     url_root = "api.digitalocean.com"
     url_suffix = "/v2/droplets"
+
     header = {
         "Content-type": "application/json",
         "Authorization": "Bearer {0}".format(token)
@@ -54,14 +53,23 @@ def create_droplet(name, ssh_key):
 
     return content
 
+def get_fingerprint(filepath):
+    """Pulls contents of file and joins, then strips, the lines."""
+    ssh_file = open(filepath, 'r')
+    ssh_file_contents = ssh_file.readlines()
+    ssh_fingerprint = ''.join(ssh_file_contents).strip()
+
+    return ssh_fingerprint
+
 ARGUMENTS = PARSER.parse_args()
+
+# Main Line
 
 print "Attempting to create droplet."
 
-SSH_FILE = open(ARGUMENTS.ssh_path, 'r')
-SSH_FILE_CONTENTS = SSH_FILE.readlines()
-SSH_FINGERPRINT = ''.join(SSH_FILE_CONTENTS).strip()
+TOKEN = os.environ['DO_TOKEN']
+SSH_FINGERPRINT = get_fingerprint(ARGUMENTS.ssh_path)
 
-RESULT = create_droplet(ARGUMENTS.name, SSH_FINGERPRINT)
+RESULT = create_droplet(TOKEN, ARGUMENTS.name, SSH_FINGERPRINT)
 
 print RESULT
